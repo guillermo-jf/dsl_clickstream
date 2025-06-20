@@ -1,0 +1,110 @@
+#!/bin/bash
+
+# This script is designed to be used as a startup script for a Google Cloud Compute Engine VM.
+# It automates the setup of a Python environment, including a virtual environment
+# and necessary libraries for Google Cloud services.
+# This script no longer assumes or references a specific Python script file.
+
+# --- Configuration ---
+TARGET_DIR="dsl_pull_etl" # Relative path, as we'll 'cd' into it
+
+# Ensure non-interactive mode for apt-get to prevent prompts during installation
+export DEBIAN_FRONTEND=noninteractive
+
+echo "--- Starting VM Startup Script ---"
+
+# 1. Update apt package lists
+# This command refreshes the list of available packages and their versions from the repositories.
+echo "Updating apt package lists..."
+sudo apt update -y
+if [ $? -eq 0 ]; then
+    echo "Apt package lists updated successfully."
+else
+    echo "Error updating apt package lists. Script will continue, but some installations might fail."
+fi
+
+# 2. Install Python 3, pip, and python3-venv (if not already present)
+# These are essential for creating and managing Python virtual environments.
+echo "Installing Python 3, pip, and python3-venv..."
+sudo apt install python3 python3-pip -y
+sudo apt-get install python3-venv -y
+if [ $? -eq 0 ]; then
+    echo "Python 3, pip, and python3-venv installed successfully."
+else
+    echo "Error installing Python 3, pip, and python3-venv. Continuing anyway, but virtual environment setup might fail."
+fi
+
+# 3. Create the target directory
+# This directory will house the virtual environment.
+echo "Checking and creating target directory: ~/${TARGET_DIR}..."
+mkdir "$TARGET_DIR"
+if [ $? -eq 0 ]; then
+    echo "Directory '$TARGET_DIR' created successfully."
+else
+    echo "Error creating directory '$TARGET_DIR'. It might already exist. Continuing."
+fi
+
+# 4. Change into the target directory
+# All subsequent operations (venv creation) will happen within this directory.
+echo "Changing directory to ~/${TARGET_DIR}..."
+cd "$TARGET_DIR"
+if [ $? -eq 0 ]; then
+    echo "Successfully changed directory to ~/${TARGET_DIR}."
+else
+    echo "Error changing directory to ~/${TARGET_DIR}. Exiting."
+    exit 1 # Critical failure, cannot proceed without being in the correct directory.
+fi
+
+# 5. Create a virtual environment named 'visits_env'
+echo "Creating virtual environment 'visits_env'..."
+python3 -m venv visits_env
+if [ $? -eq 0 ]; then
+    echo "Virtual environment 'visits_env' created successfully."
+else
+    echo "Error creating virtual environment 'visits_env'. Exiting."
+    exit 1 # Critical failure, cannot proceed with package installation.
+fi
+
+# 6. Activate the virtual environment
+# Note: 'source' command is used for activating virtual environments.
+echo "Activating virtual environment 'visits_env'..."
+source visits_env/bin/activate
+if [ $? -eq 0 ]; then
+    echo "Virtual environment 'visits_env' activated."
+else
+    echo "Error activating virtual environment 'visits_env'. Continuing anyway, but pip installs might go global."
+    # We don't exit here as pip might still install globally, which might be acceptable in some cases.
+fi
+
+# 7. Install Python packages within the virtual environment
+echo "Installing Python packages..."
+pip install google-cloud-storage
+pip install google-cloud-pubsub
+pip install google-cloud-bigquery
+pip install google-cloud-bigquery-storage
+pip install Flask
+if [ $? -eq 0 ]; then
+    echo "Python packages installed successfully."
+else
+    echo "Error installing Python packages. Check network connectivity or package names."
+fi
+
+# 8. Set gcloud project ID (optional, but good practice)
+echo "Setting gcloud project ID..."
+gcloud config set project jellyfish-training-demo-6
+if [ $? -eq 0 ]; then
+    echo "gcloud project set."
+else
+    echo "Error setting gcloud project. 'gcloud' might not be installed or authenticated."
+fi
+
+# 9. Set gcloud preferred region (optional)
+echo "Setting gcloud compute region..."
+gcloud config set compute/region us-central1
+if [ $? -eq 0 ]; then
+    echo "gcloud compute region set."
+else
+    echo "Error setting gcloud compute region."
+fi
+
+echo "--- VM Startup Script Finished ---"

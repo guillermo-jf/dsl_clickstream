@@ -1,0 +1,47 @@
+# For Debian/Ubuntu-based VMs:
+sudo apt update
+
+# For Debian/Ubuntu
+sudo apt install python3 python3-pip -y
+
+sudo apt-get install python3-venv
+
+
+# create directory 
+mkdir dsl_pull_etl 
+cd dsl_pull_etl 
+
+
+# Create a virtual environment named 'beam_env'
+python3 -m venv visits_env
+
+
+# Activate the virtual environment
+source visits_env/bin/activate
+
+pip install google-cloud-storage 
+pip install google-cloud-pubsub 
+pip install google-cloud-bigquery 
+pip install google-cloud-bigquery-storage
+pip install Flask
+
+
+# Set your project ID (optional, but good practice)
+gcloud config set project jellyfish-training-demo-6
+
+# Set your preferred region (optional)
+gcloud config set compute/region us-central1
+
+# (Optional) Verify authenticated account and project
+gcloud auth list
+gcloud config list
+
+# DO THIS EVERY TIME YOU NEED TO RUN THE SCRIPT
+# Activate the virtual environment
+source visits_env/bin/activate
+
+# Install apache-beam with GCP extras, which includes Pub/Sub, BigQuery, and GCS connectors.
+pip install 'apache-beam[gcp]==2.57.0' # Recommend pinning to a specific working version
+
+#execute code 
+# upload your python script from your Workbench environment to the dsl_pull_etl directory created above

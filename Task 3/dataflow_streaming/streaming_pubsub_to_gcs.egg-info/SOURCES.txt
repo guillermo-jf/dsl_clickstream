@@ -1,0 +1,6 @@
+setup.py
+streaming_pubsub_to_gcs.egg-info/PKG-INFO
+streaming_pubsub_to_gcs.egg-info/SOURCES.txt
+streaming_pubsub_to_gcs.egg-info/dependency_links.txt
+streaming_pubsub_to_gcs.egg-info/top_level.txt
+streaming_pubsub_to_gcs.egg-info/.ipynb_checkpoints/top_level-checkpoint.txt

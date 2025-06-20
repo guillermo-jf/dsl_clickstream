@@ -1,0 +1,91 @@
+[{
+  "product_id": "HDW-001",
+  "product_name": "Laptop X200",
+  "category": "hardware",
+  "price": "999.99"
+}, {
+  "product_id": "HDW-002",
+  "product_name": "Desktop Z500",
+  "category": "hardware",
+  "price": "1299.99"
+}, {
+  "product_id": "HDW-003",
+  "product_name": "Gaming PC Y900",
+  "category": "hardware",
+  "price": "1899.99"
+}, {
+  "product_id": "HDW-004",
+  "product_name": "Ultrabook A400",
+  "category": "hardware",
+  "price": "1199.99"
+}, {
+  "product_id": "HDW-005",
+  "product_name": "Workstation Pro 9000",
+  "category": "hardware",
+  "price": "2599.99"
+}, {
+  "product_id": "HDW-006",
+  "product_name": "Mini PC Cube",
+  "category": "hardware",
+  "price": "699.99"
+}, {
+  "product_id": "PER-001",
+  "product_name": "Wireless Mouse",
+  "category": "peripherals",
+  "price": "29.99"
+}, {
+  "product_id": "PER-002",
+  "product_name": "Mechanical Keyboard",
+  "category": "peripherals",
+  "price": "89.99"
+}, {
+  "product_id": "PER-003",
+  "product_name": "27\" 4K Monitor",
+  "category": "peripherals",
+  "price": "399.99"
+}, {
+  "product_id": "PER-004",
+  "product_name": "USB-C Docking Station",
+  "category": "peripherals",
+  "price": "129.99"
+}, {
+  "product_id": "PER-005",
+  "product_name": "Noise Cancelling Headphones",
+  "category": "peripherals",
+  "price": "199.99"
+}, {
+  "product_id": "PER-006",
+  "product_name": "Webcam HD 1080p",
+  "category": "peripherals",
+  "price": "49.99"
+}, {
+  "product_id": "SFT-001",
+  "product_name": "Office Suite Pro",
+  "category": "software",
+  "price": "199.99"
+}, {
+  "product_id": "SFT-002",
+  "product_name": "Antivirus Shield",
+  "category": "software",
+  "price": "49.99"
+}, {
+  "product_id": "SFT-003",
+  "product_name": "Photo Editor Pro",
+  "category": "software",
+  "price": "79.99"
+}, {
+  "product_id": "SFT-004",
+  "product_name": "Project Manager Plus",
+  "category": "software",
+  "price": "299.99"
+}, {
+  "product_id": "SFT-005",
+  "product_name": "Video Editor Pro",
+  "category": "software",
+  "price": "149.99"
+}, {
+  "product_id": "SFT-006",
+  "product_name": "Music Studio 2024",
+  "category": "software",
+  "price": "89.99"
+}]

@@ -1,0 +1,132 @@
+{
+"fields" : [
+  {
+    "name": "session_id",
+    "type": "STRING"
+  },
+  {
+    "name": "user_id",
+    "type": "STRING"
+  },
+  {
+    "name": "device_type",
+    "type": "STRING"
+  },
+  {
+    "name": "geolocation",
+    "type": "GEOGRAPHY"
+  },
+  {
+    "name": "user_agent",
+    "type": "STRING"
+  },
+  {
+    "name": "visit_start_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "visit_end_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "events",
+    "type": "RECORD",
+    "mode": "REPEATED",
+    "fields": [
+      {
+        "name": "event_type",
+        "type": "STRING"
+      },
+      {
+        "name": "event_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "page_view",
+        "type": "RECORD",
+        "fields": [
+          {
+            "name": "page_url",
+            "type": "STRING"
+          },
+          {
+            "name": "referrer_url",
+            "type": "STRING"
+          }
+        ]
+      },
+      {
+        "name": "add_cart",
+        "type": "RECORD",
+        "fields": [
+          {
+            "name": "product_id",
+            "type": "STRING"
+          },
+          {
+            "name": "product_name",
+            "type": "STRING"
+          },
+          {
+            "name": "category",
+            "type": "STRING"
+          },
+          {
+            "name": "price",
+            "type": "FLOAT"
+          },
+          {
+            "name": "quantity",
+            "type": "INTEGER"
+          }
+        ]
+      },
+      {
+        "name": "purchase",
+        "type": "RECORD",
+        "fields": [
+          {
+            "name": "order_id",
+            "type": "STRING"
+          },
+          {
+            "name": "amount",
+            "type": "FLOAT"
+          },
+          {
+            "name": "currency",
+            "type": "STRING"
+          },
+          {
+            "name": "items",
+            "type": "RECORD",
+            "mode": "REPEATED",
+            "fields": [
+              {
+                "name": "product_id",
+                "type": "STRING"
+              },
+              {
+                "name": "product_name",
+                "type": "STRING"
+              },
+              {
+                "name": "category",
+                "type": "STRING"
+              },
+              {
+                "name": "price",
+                "type": "FLOAT"
+              },
+              {
+                "name": "quantity",
+                "type": "INTEGER"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
+}
