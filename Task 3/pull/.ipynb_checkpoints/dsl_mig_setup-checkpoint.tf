@@ -134,7 +134,18 @@ resource "google_compute_instance_template" "vm_template_clickstream" {
         echo "Error installing Python packages. Check network connectivity or package names."
     fi
 
-    # 8. Set gcloud project ID (optional, but good practice)
+    # 8. Download the Python script from GCS
+    # The gsutil command-line tool is pre-installed on standard Google Cloud images.
+    echo "Downloading Python script from GCS..."
+    gsutil cp gs://jellyfish-training-demo-6/dsl-project/pull_subscriber_BQ_Storage_API.py .
+    if [ $? -eq 0 ]; then
+        echo "Python script downloaded successfully."
+    else
+        echo "Error downloading Python script from GCS. Check bucket/object path and permissions."
+    fi
+
+
+    # 9. Set gcloud project ID (optional, but good practice)
     echo "Setting gcloud project ID..."
     gcloud config set project jellyfish-training-demo-6
     if [ $? -eq 0 ]; then
@@ -143,7 +154,7 @@ resource "google_compute_instance_template" "vm_template_clickstream" {
         echo "Error setting gcloud project. 'gcloud' might not be installed or authenticated."
     fi
 
-    # 9. Set gcloud preferred region (optional)
+    # 10. Set gcloud preferred region (optional)
     echo "Setting gcloud compute region..."
     gcloud config set compute/region us-central1
     if [ $? -eq 0 ]; then
