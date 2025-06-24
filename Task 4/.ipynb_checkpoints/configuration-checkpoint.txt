@@ -1,0 +1,15 @@
+
+export COMPOSER_URL="https://db629bb992bd445392567b03b747a39a-dot-us-central1.composer.googleusercontent.com/api/v1/dags/event_driven_gcs_trigger_logger/dagRuns"
+
+export IAP_ID="387528315161-l4l3cn8bdv7dju7ak9k1v7mdet7i6g3t.apps.googleusercontent.com"
+
+
+gcloud functions deploy gcs-airflow-trigger-function \
+--gen2 \
+--runtime python39 \
+--region us-central1 \
+--source . \
+--entry-point trigger_dag \
+--trigger-resource guillermo-lake \
+--trigger-event google.storage.object.finalize \
+--set-env-vars=IAP_CLIENT_ID=$IAP_ID,COMPOSER_DAG_TRIGGER_URL=$COMPOSER_URL
