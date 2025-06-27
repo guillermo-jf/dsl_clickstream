@@ -1,0 +1,44 @@
+Perform these steps below in cloud shell 
+
+Important: check IDs and names for all the resources deployed in these steps, make sure you use your own configuration values. 
+
+
+Step 1: 
+Create a new directory for this process 
+mkdir xxxx
+cd xxxx
+
+download the files from the jupyterlab shared folder for task4_dataflow
+
+
+Step 2: 
+
+Enable the required APIs:
+
+gcloud services enable containerregistry.googleapis.com
+gcloud services enable cloudbuild.googleapis.com
+
+Create an Artifact Registry Repository
+First, you need a repository to store your Docker images. Run this command in your Cloud Shell to create one:
+
+gcloud artifacts repositories create dataflow-images \
+    --repository-format=docker \
+    --location=us-central1 \
+    --description="Repository for Dataflow Flex Template images"
+    
+Step 3: manually create the container image to the artifacts repo  
+
+Make sure to replace <YOUR_COMPOSER_GCS_BUCKET> and <PROJECT_ID> with the name of your Composer bucket.
+
+gcloud builds submit . \
+--tag "us-central1-docker.pkg.dev/<PROJECT_ID>/dataflow-images/clickstream-template:latest"
+
+Step 4: Re-build the Flex Template (to Artifact Registry)
+Now, navigate to the directory in Cloud Shell that contains your Dockerfile, dataflow_job.py, requirements.txt, and metadata.json files. Run the following updated gcloud build command. This version points to your new Artifact Registry repository.
+
+
+gcloud dataflow flex-template build \
+gs://<YOUR_COMPOSER_GCS_BUCKET>/dataflow_templates/clickstream_template.json \
+--image "us-central1-docker.pkg.dev/<PROJECT_ID>/dataflow-images/clickstream-template:latest" \
+--sdk-language "PYTHON" \
+--metadata-file "metadata.json"

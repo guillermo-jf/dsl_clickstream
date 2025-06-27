@@ -1,78 +1,77 @@
-# main.py - For Google Cloud Function deployment
+# main.py - For Google Cloud Function deployment (Definitive Solution)
 
 import os
-import google.auth
-from google.auth.transport.requests import Request
-from google.oauth2 import id_token
-import requests
+import subprocess
+import json
 
 # --- CONFIGURATION ---
-# Set these as Environment Variables in your Cloud Function
-# The IAP Client ID can be found on the OAuth consent screen page in the GCP console.
-IAP_CLIENT_ID = os.environ.get("IAP_CLIENT_ID")
-# The trigger URL for your DAG in Cloud Composer.
-# Format: https://<composer-web-server-url>/api/v1/dags/<dag-id>/dagRuns
-COMPOSER_DAG_TRIGGER_URL = os.environ.get("COMPOSER_DAG_TRIGGER_URL")
+# These are set as Environment Variables in your Cloud Function
+COMPOSER_ENVIRONMENT_NAME = os.environ.get("COMPOSER_ENVIRONMENT_NAME") # e.g., 'dsl-clickstream2'
+COMPOSER_LOCATION = os.environ.get("COMPOSER_LOCATION")             # e.g., 'us-central1'
+DAG_ID = "event_driven_gcs_trigger_logger"
 GCS_FILE_PREFIX = "clickstream_task4/"
 
 
-def make_iap_request(url, method="POST", json=None):
-    """
-    Makes a request to a URL protected by Identity-Aware Proxy (IAP).
-    """
-    # Obtain OpenID Connect token
-    auth_req = Request()
-    # This service_account_email is only needed if you are running this locally
-    # and have authenticated with a service account. On Cloud Functions, the
-    # runtime service account is used automatically.
-    creds = id_token.fetch_id_token(auth_req, IAP_CLIENT_ID)
-
-    headers = {"Authorization": f"Bearer {creds}"}
-
-    response = requests.request(method, url, headers=headers, json=json)
-    response.raise_for_status()  # Raise an exception for bad status codes
-    return response.json()
-
-
-def trigger_dag(event, context):
+def trigger_dag(event, context=None):
     """
     Background Cloud Function to be triggered by a GCS event.
-    This function is executed when a file is created in a GCS bucket.
+    This function uses the 'gcloud composer' command to trigger a DAG,
+    which works for all Composer 2 network configurations.
     """
-    bucket_name = event["bucket"]
-    file_name = event["name"]
+    data = event.get_json()
+    if not data or 'name' not in data or 'bucket' not in data:
+        print("Invalid GCS event data received.")
+        return ("Bad Request: Invalid GCS event data", 400)
+
+    bucket_name = data["bucket"]
+    file_name = data["name"]
 
     print(f"Processing file: {file_name} in bucket: {bucket_name}.")
 
-    # --- Validation ---
-    # Check if the file is in the correct folder and has the right extension.
     if not file_name.startswith(GCS_FILE_PREFIX) or not file_name.lower().endswith(".jsonl"):
         print(f"File {file_name} is not a target file. Skipping.")
-        return
+        return ("Skipped file, not a target.", 200)
 
-    print(f"File {file_name} is a target file. Triggering Airflow DAG.")
+    print(f"File {file_name} is a target file. Triggering Airflow DAG: {DAG_ID}")
 
-    # --- Prepare DAG Trigger ---
-    # The configuration payload to send to the DAG. The DAG will access this via `dag_run.conf`.
-    dag_conf = {"conf": {"file_name": file_name}}
+    # For this method, we must pass the configuration as a JSON string.
+    dag_conf = json.dumps({"file_name": file_name})
+
+    # The gcloud command to trigger the DAG
+    command = [
+        "gcloud",
+        "composer",
+        "environments",
+        "run",
+        COMPOSER_ENVIRONMENT_NAME,
+        "--location",
+        COMPOSER_LOCATION,
+        "dags",
+        "trigger",
+        "--",
+        DAG_ID,
+        "--conf",
+        dag_conf,
+    ]
 
     try:
-        # Trigger the DAG
-        response = make_iap_request(
-            COMPOSER_DAG_TRIGGER_URL, method="POST", json=dag_conf
+        print(f"Executing command: {' '.join(command)}")
+        subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=True  # Will raise an error for non-zero exit codes
         )
-        print("Successfully triggered DAG:", response)
+        success_message = f"Successfully triggered DAG {DAG_ID} for file: {file_name}"
+        print(success_message)
+        return (success_message, 200)
+
+    except subprocess.CalledProcessError as e:
+        error_message = f"Error triggering DAG with gcloud. Stderr: {e.stderr}"
+        print(error_message)
+        return (error_message, 500)
     except Exception as e:
-        print(f"Error triggering DAG: {e}")
-        # Re-raise the exception to signal a failure to Cloud Functions
-        # This will cause the function to be retried.
-        raise
+        error_message = f"An unexpected error occurred: {e}"
+        print(error_message)
+        return (error_message, 500)
 
-
-# requirements.txt
-#
-# google-auth
-# google-auth-oauthlib
-# google-auth-httplib2
-# google-cloud-storage
-# requests

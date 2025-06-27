@@ -1,0 +1,18 @@
+{
+  "name": "GCS to BigQuery Clickstream",
+  "description": "A Flex Template pipeline that processes JSONL files from GCS and loads them into a BigQuery table.",
+  "parameters": [
+    {
+      "name": "input_file",
+      "label": "Input GCS File Path",
+      "helpText": "The GCS path to the JSONL file to be processed. (e.g., gs://bucket/path/to/file.jsonl)",
+      "isOptional": false
+    },
+    {
+      "name": "output_table",
+      "label": "Output BigQuery Table",
+      "helpText": "The BigQuery table to write the output to. Format: PROJECT:DATASET.TABLE",
+      "isOptional": false
+    }
+  ]
+}

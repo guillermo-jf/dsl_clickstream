@@ -1,0 +1,14 @@
+# Dockerfile for Dataflow Flex Template
+# Base image with Python 3.11
+FROM gcr.io/dataflow-templates-base/python3-template-launcher-base
+
+# Set the environment variable to launch the Python script
+ENV FLEX_TEMPLATE_PYTHON_PY_FILE="/template/dataflow_job.py"
+
+# Copy the requirements file and install dependencies
+# We only need apache-beam with GCP support
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the Dataflow job script into the container
+COPY dataflow_job.py /template/

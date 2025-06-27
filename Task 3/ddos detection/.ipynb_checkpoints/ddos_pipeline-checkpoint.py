@@ -108,3 +108,15 @@ def run(argv=None):
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
     run()
+    
+    
+"""
+how to run this pipeline
+python3 ddos_pipeline.py     
+  --runner DataflowRunner     
+  --project jellyfish-training-demo-6     
+  --region us-central1     
+  --temp_location gs://jellyfish-training-demo-6/temp     
+  --job_name "pageview-counter-final-job-$(date +'%Y%m%d-%H%M%S')"     
+  --subscription projects/jellyfish-training-demo-6/subscriptions/dsl-clickstream-ddos
+"""

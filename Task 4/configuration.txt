@@ -1,8 +1,12 @@
-
+old composer env
 export COMPOSER_URL="https://db629bb992bd445392567b03b747a39a-dot-us-central1.composer.googleusercontent.com/api/v1/dags/event_driven_gcs_trigger_logger/dagRuns"
+
+new composer env
+export COMPOSER_URL="https://0b22ab3f0ee44756b2377adc459df414-dot-us-central1.composer.googleusercontent.com/api/v1/dags/event_driven_gcs_trigger_logger/dagRuns"
 
 export IAP_ID="387528315161-l4l3cn8bdv7dju7ak9k1v7mdet7i6g3t.apps.googleusercontent.com"
 
+service-387528315161@gs-project-accounts.iam.gserviceaccount.com
 
 gcloud functions deploy gcs-airflow-trigger-function \
 --gen2 \
@@ -24,5 +28,83 @@ gcloud projects add-iam-policy-binding qwiklabs-gcp-04-d19065ab63ef \
 --role="roles/composer.user"
 
 
+python3 ddos_pipeline.py     
+--runner DataflowRunner     
+--project jellyfish-training-demo-6     
+--region us-central1     
+--temp_location gs://jellyfish-training-demo-6/temp     
+--job_name "pageview-counter-final-job-$(date +'%Y%m%d-%H%M%S')"     
+--subscription projects/jellyfish-training-demo-6/subscriptions/dsl-clickstream-ddos
 
-https://db629bb992bd445392567b03b747a39a-dot-us-central1.composer.googleusercontent.com/
+
+
+task 4 new approach 
+
+Step 1: Create a Pub/Sub Topic/subscription
+First, create a topic that GCS will send messages to. Run this command in your Cloud Shell:
+
+gcloud pubsub topics create gcs-clickstream-triggers
+
+gcloud pubsub subscriptions create gcs-triggers-sub \
+--topic=gcs-clickstream-triggers
+
+Step 2: Create the GCS Notification
+Next, tell your GCS bucket to send a message to the topic you just created whenever a new .jsonl file is uploaded to the clickstream_task4/ directory.
+
+gcloud storage buckets notifications create gs://guillermo-lake \
+--topic=gcs-clickstream-triggers \
+--event-types=OBJECT_FINALIZE \
+--object-prefix=clickstream_task4/ \
+--payload-format=json
+
+
+Step 2: Build the Flex Template
+Next, you need to build the template and store it in GCS. This is a one-time command you will run in your Cloud Shell.
+
+Enable the required APIs:
+Bash
+
+gcloud services enable containerregistry.googleapis.com
+gcloud services enable cloudbuild.googleapis.com
+
+
+Run the build command. Make sure to replace <YOUR_COMPOSER_GCS_BUCKET> with the name of your Composer bucket.
+Bash
+
+gcloud dataflow flex-template build \
+gs://us-central1-dsl-clickstream-fd8a664b-bucket/dataflow_templates/clickstream_template.json \
+--image "gcr.io/jellyfish-training-demo-6/dataflow/clickstream-template:latest" \
+--sdk-language "PYTHON" \
+--metadata-file "metadata.json"
+
+
+
+Step 1: Create an Artifact Registry Repository
+First, you need a repository to store your Docker images. Run this command in your Cloud Shell to create one:
+
+
+gcloud artifacts repositories create dataflow-images \
+    --repository-format=docker \
+    --location=us-central1 \
+    --description="Repository for Dataflow Flex Template images"
+    
+gcloud builds submit . \
+--tag "us-central1-docker.pkg.dev/jellyfish-training-demo-6/dataflow-images/clickstream-template:latest"
+
+Step 2: build the Flex Template (to Artifact Registry)
+Now, navigate to the directory in Cloud Shell that contains your Dockerfile, dataflow_job.py, requirements.txt, and metadata.json files. Run the following updated gcloud build command. This version points to your new Artifact Registry repository.
+
+Make sure to replace <YOUR_COMPOSER_GCS_BUCKET> with the name of your Composer bucket.
+
+gcloud dataflow flex-template build \
+gs://<YOUR_COMPOSER_GCS_BUCKET>/dataflow_templates/clickstream_template.json \
+--image "us-central1-docker.pkg.dev/<PROJECT_ID>/dataflow-images/clickstream-template:latest" \
+--sdk-language "PYTHON" \
+--metadata-file "metadata.json"
+
+gcloud dataflow flex-template build \
+gs://us-central1-dsl-clickstream-fd8a664b-bucket/dataflow_templates/clickstream_template.json \
+--image "us-central1-docker.pkg.dev/jellyfish-training-demo-6/dataflow-images/clickstream-template:latest" \
+--sdk-language "PYTHON"
+
+
